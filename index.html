@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>JIO-BP Spot Check Vehicle Search</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+        background: #f3f6f9;
+        color: #1f2937;
+    }
+
+    /* HEADER */
+    .header {
+        background: linear-gradient(135deg, #075985, #0284c7);
+        color: white;
+        padding: 22px 30px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.12);
+    }
+
+    .header-content {
+        max-width: 1200px;
+        margin: auto;
+    }
+
+    .title {
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .subtitle {
+        margin-top: 5px;
+        font-size: 14px;
+        opacity: 0.9;
+    }
+
+    /* MAIN */
+    .container {
+        max-width: 1200px;
+        margin: 30px auto;
+        padding: 0 20px;
+    }
+
+    /* SEARCH CARD */
+    .search-card {
+        background: white;
+        border-radius: 14px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+        margin-bottom: 20px;
+    }
+
+    .search-title {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    .search-box {
+        display: flex;
+        gap: 10px;
+    }
+
+    .search-input {
+        flex: 1;
+        height: 52px;
+        border: 2px solid #d1d5db;
+        border-radius: 10px;
+        padding: 0 18px;
+        font-size: 18px;
+        outline: none;
+        text-transform: uppercase;
+    }
+
+    .search-input:focus {
+        border-color: #0284c7;
+        box-shadow: 0 0 0 3px rgba(2,132,199,0.12);
+    }
+
+    .clear-btn {
+        border: none;
+        background: #64748b;
+        color: white;
+        padding: 0 22px;
+        border-radius: 10px;
+        font-size: 16px;
+        cursor: pointer;
+    }
+
+    .clear-btn:hover {
+        background: #475569;
+    }
+
+    .hint {
+        margin-top: 10px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    /* STATUS */
+    .status-card {
+        display: none;
+        border-radius: 14px;
+        padding: 22px;
+        margin-bottom: 20px;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .status-checked {
+        display: block;
+        background: #fee2e2;
+        color: #991b1b;
+        border-left: 6px solid #dc2626;
+    }
+
+    .status-new {
+        display: block;
+        background: #dcfce7;
+        color: #166534;
+        border-left: 6px solid #16a34a;
+    }
+
+    /* RESULTS */
+    .results-card {
+        background: white;
+        border-radius: 14px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+        overflow: hidden;
+    }
+
+    .results-header {
+        padding: 18px 22px;
+        border-bottom: 1px solid #e5e7eb;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background: #f1f5f9;
+        color: #334155;
+        padding: 14px;
+        text-align: left;
+        font-size: 14px;
+    }
+
+    td {
+        padding: 14px;
+        border-top: 1px solid #e5e7eb;
+        font-size: 14px;
+    }
+
+    tr:hover {
+        background: #f8fafc;
+    }
+
+    .vehicle {
+        font-weight: 700;
+        color: #075985;
+        letter-spacing: 0.5px;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+    }
+
+    .badge-checked {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    /* EMPTY */
+    .empty {
+        text-align: center;
+        padding: 45px 20px;
+        color: #64748b;
+    }
+
+    .empty-icon {
+        font-size: 40px;
+        margin-bottom: 10px;
+    }
+
+    /* FOOTER */
+    .footer {
+        text-align: center;
+        padding: 25px;
+        color: #64748b;
+        font-size: 13px;
+    }
+
+    @media(max-width: 600px) {
+        .header {
+            padding: 18px;
+        }
+
+        .title {
+            font-size: 21px;
+        }
+
+        .container {
+            margin-top: 20px;
+        }
+
+        .search-box {
+            flex-direction: column;
+        }
+
+        .clear-btn {
+            height: 48px;
+        }
+
+        th, td {
+            padding: 10px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-content">
+        <div class="title">JIO-BP Spot Check</div>
+        <div class="subtitle">
+            Vehicle Verification & Duplicate Check System
+        </div>
+    </div>
+</div>
+
+<!-- MAIN -->
+<div class="container">
+
+    <!-- SEARCH -->
+    <div class="search-card">
+
+        <div class="search-title">
+            🔎 Search Vehicle
+        </div>
+
+        <div class="search-box">
+
+            <input
+                type="text"
+                id="vehicleSearch"
+                class="search-input"
+                placeholder="Enter vehicle number or last 4 digits..."
+                autocomplete="off"
+            >
+
+            <button class="clear-btn" onclick="clearSearch()">
+                Clear
+            </button>
+
+        </div>
+
+        <div class="hint">
+            Example: <b>GJ19Y1148</b>, <b>1148</b>, <b>gj19</b>,
+            <b>GJ 19</b>, <b>Gj45</b>
+        </div>
+
+    </div>
+
+    <!-- STATUS -->
+    <div id="statusCard" class="status-card"></div>
+
+    <!-- RESULTS -->
+    <div class="results-card">
+
+        <div class="results-header">
+            Search Results
+        </div>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Sr. No.</th>
+                        <th>Vehicle No.</th>
+                        <th>Depot</th>
+                        <th>Check Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="resultsBody">
+
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty">
+                                <div class="empty-icon">🚛</div>
+                                Enter a vehicle number to search
+                            </div>
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="footer">
+    JIO-BP Fleet Vigilance | Spot Check Vehicle Verification
+</div>
+
+
+<script>
+
+/* ==========================================================
+   VEHICLE DATA
+   Add your new checked vehicles inside this list.
+
+   Format:
+   ["Vehicle No.", "Depot", "Check Date"]
+   ========================================================== */
+
+const vehicleData = [
+
+    ["GJ19Y1148", "HAZIRA", "29-Oct-25"],
+    ["DD01K9458", "HAZIRA", "29-Oct-25"],
+    ["DD03R9166", "HAZIRA", "29-Oct-25"],
+    ["CG10BJ9580", "HAZIRA", "29-Oct-25"],
+    ["GJ26U7799", "HAZIRA", "29-Oct-25"],
+    ["DN09S9221", "HAZIRA", "29-Oct-25"],
+    ["GJ08AU1583", "HAZIRA", "29-Oct-25"],
+    ["GJ26U1882", "HAZIRA", "29-Oct-25"],
+    ["GJ08AU3941", "HAZIRA", "30-Oct-25"],
+    ["DN09Q9441", "HAZIRA", "30-Oct-25"],
+    ["GJ26T9321", "HAZIRA", "30-Oct-25"],
+    ["GJ19X8136", "HAZIRA", "30-Oct-25"],
+    ["GJ18AZ7776", "HAZIRA", "30-Oct-25"],
+    ["DN09U9863", "HAZIRA", "30-Oct-25"],
+    ["GJ21W2317", "HAZIRA", "30-Oct-25"],
+    ["DN09P9027", "HAZIRA", "30-Oct-25"],
+    ["GJ03BW7871", "HAZIRA", "30-Oct-25"],
+    ["GJ27X6323", "HAZIRA", "30-Oct-25"],
+    ["MH04MH1019", "HAZIRA", "30-Oct-25"],
+    ["GJ08AU1875", "HAZIRA", "30-Oct-25"],
+
+    ["MH20DE7737", "JNPT", "05-Nov-25"],
+    ["MH20GC7585", "JNPT", "05-Nov-25"],
+    ["MH25AJ9877", "JNPT", "05-Nov-25"],
+    ["MH43BX4566", "JNPT", "05-Nov-25"],
+    ["MH26CH2700", "JNPT", "05-Nov-25"],
+    ["MH42BF4072", "JNPT", "05-Nov-25"],
+    ["MH42AQ4563", "JNPT", "05-Nov-25"],
+    ["MH18BG0719", "JNPT", "05-Nov-25"],
+    ["GJ39T4508", "JNPT", "05-Nov-25"],
+    ["GJ39T6356", "JNPT", "05-Nov-25"],
+
+    ["HR64A2067", "REWARI", "10-Nov-25"],
+    ["UP17BT7680", "REWARI", "10-Nov-25"],
+    ["HR47G3334", "REWARI", "10-Nov-25"],
+    ["UP17BT7678", "REWARI", "10-Nov-25"],
+    ["UP83ET0235", "REWARI", "10-Nov-25"],
+    ["HR45E7281", "REWARI", "10-Nov-25"],
+    ["HR65A6794", "REWARI", "10-Nov-25"],
+    ["HR66C3195", "REWARI", "10-Nov-25"],
+    ["HR73B9461", "REWARI", "10-Nov-25"],
+
+    ["HR39D0055", "REWARI", "11-Nov-25"],
+    ["UP83DT8028", "REWARI", "11-Nov-25"],
+    ["HR45E0751", "REWARI", "11-Nov-25"],
+    ["HR39E8933", "REWARI", "11-Nov-25"],
+    ["HR64A3815", "REWARI", "11-Nov-25"],
+    ["UK07CD5604", "REWARI", "11-Nov-25"],
+    ["UP65ET3281", "REWARI", "11-Nov-25"],
+    ["HR58E0507", "REWARI", "11-Nov-25"],
+    ["RJ23GD4427", "REWARI", "11-Nov-25"],
+    ["HR65A8469", "REWARI", "11-Nov-25"],
+
+    ["UP31AT7347", "REWARI", "11-Nov-25"],
+    ["HR55AX0777", "REWARI", "11-Nov-25"],
+    ["UP52AT6930", "REWARI", "11-Nov-25"],
+    ["UK06CC1227", "REWARI", "11-Nov-25"],
+    ["RJ18GD0151", "JOBNER", "11-Nov-25"],
+    ["HR56C3384", "REWARI", "11-Nov-25"],
+    ["UK07CD6192", "REWARI", "11-Nov-25"],
+    ["HR56C6873", "REWARI", "11-Nov-25"],
+    ["HR58E2507", "REWARI", "11-Nov-25"],
+    ["HR63F2734", "REWARI", "11-Nov-25"],
+    ["HR74A5868", "REWARI", "11-Nov-25"],
+    ["HR74B0555", "REWARI", "11-Nov-25"],
+    ["PB03BN3753", "REWARI", "11-Nov-25"],
+    ["RJ18GC6111", "JOBNER", "11-Nov-25"],
+    ["UK06CC5577", "REWARI", "11-Nov-25"],
+    ["UP78JN5771", "REWARI", "11-Nov-25"],
+
+    ["MH17DH9396", "JNPT", "17-Nov-25"],
+    ["MH43CK0025", "JNPT", "17-Nov-25"],
+    ["GJ39T4107", "JNPT", "17-Nov-25"],
+    ["GJ12CT0925", "JNPT", "17-Nov-25"],
+    ["NL01AJ3343", "JNPT", "17-Nov-25"],
+
+    ["GJ12BZ0920", "BHOPAL", "18-Nov-25"],
+    ["GJ12BZ1564", "BHOPAL", "18-Nov-25"],
+    ["RJ19GG1813", "BHOPAL", "18-Nov-25"],
+    ["CG07CV1453", "BHOPAL", "18-Nov-25"],
+    ["CG07CT9362", "BHOPAL", "18-Nov-25"],
+    ["UP66AT0847", "BHOPAL", "18-Nov-25"],
+    ["UP66AT4962", "BHOPAL", "18-Nov-25"],
+    ["CG07CY4220", "BHOPAL", "18-Nov-25"],
+    ["CG07CY4219", "BHOPAL", "18-Nov-25"],
+    ["MP37ZE1235", "BHOPAL", "18-Nov-25"],
+    ["MP04YN4990", "BHOPAL", "18-Nov-25"],
+    ["MP04YN1990", "BHOPAL", "18-Nov-25"],
+    ["MP07ZT8096", "BHOPAL", "18-Nov-25"],
+    ["MP37ZE1259", "BHOPAL", "18-Nov-25"],
+
+    ["GJ39T6307", "JNPT", "24-Nov-25"],
+    ["MH43CE9932", "JNPT", "24-Nov-25"],
+    ["MH43CE9935", "JNPT", "24-Nov-25"],
+
+    ["GJ03BZ8271", "JAMNAGAR", "01-Dec-25"],
+    ["GJ10TX2651", "JAMNAGAR", "01-Dec-25"],
+    ["GJ10TX3577", "JAMNAGAR", "01-Dec-25"],
+    ["GJ10TX5517", "JAMNAGAR", "01-Dec-25"],
+    ["GJ39T7264", "JAMNAGAR", "01-Dec-25"],
+
+    ["KA19AB8595", "MANGALORE", "24-Dec-25"],
+    ["KA19AC7014", "MANGALORE", "24-Dec-25"],
+    ["KA19AC7141", "MANGALORE", "24-Dec-25"],
+    ["KA19AD1006", "MANGALORE", "24-Dec-25"],
+    ["KA19AD5303", "MANGALORE", "24-Dec-25"],
+    ["KA19AE3106", "MANGALORE", "24-Dec-25"],
+
+    ["UP27AT2106", "KANPUR", "24-Dec-25"],
+    ["UP27T9220", "KANPUR", "24-Dec-25"],
+    ["UP31AT0287", "KANPUR", "24-Dec-25"],
+    ["UP31BT9615", "KANPUR", "24-Dec-25"],
+    ["UP31CT2502", "KANPUR", "24-Dec-25"],
+    ["UP52AT2171", "KANPUR", "24-Dec-25"],
+    ["UP53DT9766", "KANPUR", "24-Dec-25"],
+
+    ["CG07CJ7736", "BHOPAL", "25-Dec-25"],
+    ["MP04HE7886", "BHOPAL", "25-Dec-25"],
+    ["MP07ZT7396", "BHOPAL", "25-Dec-25"],
+    ["MP09HH7715", "BHOPAL", "25-Dec-25"],
+    ["MP13H0877", "BHOPAL", "25-Dec-25"],
+    ["MP13ZN7096", "BHOPAL", "25-Dec-25"],
+
+    ["TN09CX9253", "CHENNAI", "01-Apr-26"],
+    ["TN88C1191", "CHENNAI", "01-Apr-26"],
+    ["TN91R1526", "CHENNAI", "01-Apr-26"],
+    ["TN48CZ4096", "CHENNAI", "01-Apr-26"],
+    ["TN03Z3339", "CHENNAI", "01-Apr-26"],
+    ["TN05CY9799", "CHENNAI", "01-Apr-26"],
+    ["TN91AU3750", "CHENNAI", "01-Apr-26"],
+
+    ["GJ12CT0974", "MANGALORE", "21-May-26"],
+    ["KA13C4873", "MANGALORE", "21-May-26"],
+    ["KA19AF2120", "MANGALORE", "21-May-26"],
+    ["KA19AF2377", "MANGALORE", "21-May-26"],
+
+    ["UP15JT6298", "KANPUR", "05-Jun-26"],
+    ["UP31AT3677", "KANPUR", "05-Jun-26"],
+    ["UP53ET8884", "KANPUR", "05-Jun-26"],
+    ["UP53FT1617", "KANPUR", "05-Jun-26"],
+    ["UP53LT7996", "KANPUR", "05-Jun-26"],
+    ["UP65HT7907", "KANPUR", "05-Jun-26"],
+    ["UP65KT5791", "KANPUR", "05-Jun-26"],
+
+    ["GJ39TA4679", "MANGALORE", "06-Jun-26"],
+
+    ["MP07ZT5696", "BHOPAL", "08-Jun-26"],
+    ["MP07ZT9296", "BHOPAL", "08-Jun-26"],
+    ["MP13ZN8496", "BHOPAL", "08-Jun-26"],
+    ["MP13ZT9096", "BHOPAL", "08-Jun-26"],
+    ["MP37ZF2769", "BHOPAL", "08-Jun-26"],
+    ["MP37ZJ9101", "BHOPAL", "08-Jun-26"],
+
+    ["KA19AF1989", "MANGALORE", "10-Jun-26"],
+    ["KA19AE4920", "MANGALORE", "12-Jun-26"],
+    ["KA19AF2880", "MANGALORE", "12-Jun-26"],
+    ["KA30A6445", "MANGALORE", "12-Jun-26"],
+
+    ["MH27BX5781", "BPCL MANMAD", "13-Jun-26"],
+    ["MH41BU9586", "BPCL MANMAD", "13-Jun-26"],
+    ["MH08AP8400", "JNPT", "13-Jun-26"],
+    ["MH17BD4317", "JNPT", "13-Jun-26"],
+    ["MH43CQ1589", "JNPT", "13-Jun-26"],
+
+    ["MH35AJ6125", "JNPT", "20-Jun-26"],
+    ["MH43CK0024", "JNPT", "20-Jun-26"],
+    ["MH46BU7284", "JNPT", "20-Jun-26"],
+    ["NL01AJ3326", "JNPT", "20-Jun-26"],
+    ["HR47E4498", "REWARI", "20-Jun-26"],
+    ["HR58E4107", "REWARI", "20-Jun-26"],
+    ["PB03BA9808", "REWARI", "20-Jun-26"],
+
+    ["MH23AU2284", "JNPT", "25-Jun-26"],
+    ["MH43CK5487", "JNPT", "25-Jun-26"],
+    ["NL01AJ3321", "JNPT", "25-Jun-26"],
+
+    ["GJ06BX2308", "BPCL MANMAD", "30-Jun-26"],
+    ["GJ10TX5575", "JAMNAGAR", "30-Jun-26"],
+    ["HR38X5959", "REWARI", "30-Jun-26"],
+    ["HR39E6342", "REWARI", "30-Jun-26"],
+    ["HR69C7757", "REWARI", "30-Jun-26"],
+    ["UP52AT3340", "REWARI", "30-Jun-26"],
+
+    ["HR68C3797", "REWARI", "03-Jul-26"],
+    ["HR58E0740", "REWARI", "03-Jul-26"],
+    ["PB13BS7767", "REWARI", "03-Jul-26"],
+    ["UK18CA6357", "REWARI", "03-Jul-26"],
+    ["HR69C8477", "REWARI", "03-Jul-26"],
+    ["UK18CA6387", "REWARI", "03-Jul-26"],
+    ["RJ13GB5709", "REWARI", "03-Jul-26"],
+    ["UP15JT2913", "REWARI", "03-Jul-26"],
+    ["UP17BT3496", "REWARI", "03-Jul-26"],
+    ["UP17BT5531", "REWARI", "03-Jul-26"],
+    ["UP31AT5077", "REWARI", "03-Jul-26"],
+
+    ["GJ39T0375", "BPCL BINA", "08-Jul-26"],
+    ["UP53ET2733", "REWARI", "08-Jul-26"],
+
+    ["MH41AT2111", "BPCL MANMAD", "16-Jul-26"],
+
+    ["UP78JN8537", "KANPUR", "21-Jul-26"],
+    ["UP80GT8089", "KANPUR", "21-Jul-26"],
+    ["UP65JT1594", "KANPUR", "21-Jul-26"],
+    ["UP78DT0070", "KANPUR", "21-Jul-26"],
+    ["UP78JT6277", "KANPUR", "21-Jul-26"],
+    ["UP78JN7040", "KANPUR", "21-Jul-26"],
+    ["UP17BT0609", "KANPUR", "21-Jul-26"],
+    ["UP66AT3582", "KANPUR", "21-Jul-26"],
+    ["JH24J3756", "KANPUR", "21-Jul-26"],
+    ["UP31CT7667", "KANPUR", "21-Jul-26"],
+    ["UP53LT0098", "KANPUR", "21-Jul-26"],
+    ["UP27CT2723", "KANPUR", "21-Jul-26"],
+    ["UP80LT0797", "KANPUR", "21-Jul-26"],
+    ["UP65JT9199", "KANPUR", "21-Jul-26"],
+    ["UP11BT7490", "KANPUR", "21-Jul-26"],
+    ["UP65QT1841", "KANPUR", "21-Jul-26"],
+
+    ["HR47E2389", "REWARI", "22-Jul-26"],
+    ["HR69C1180", "REWARI", "22-Jul-26"],
+    ["MH41AU9175", "BPCL MANMAD", "22-Jul-26"],
+    ["MH12SX8794", "BPCL MANMAD", "22-Jul-26"],
+
+    ["GJ12CT0832", "JNPT", "25-Jul-26"],
+    ["MH46CU8351", "JNPT", "25-Jul-26"],
+
+    ["UP86T8871", "REWARI", "27-Jul-26"],
+    ["UK04CC2489", "REWARI", "27-Jul-26"],
+    ["UP17BT0345", "REWARI", "27-Jul-26"],
+    ["UK18CA7767", "REWARI", "27-Jul-26"],
+
+    ["MH43CK6900", "JNPT", "29-Jul-26"],
+    ["MH10CR7651", "JNPT", "29-Jul-26"],
+    ["GJ12CT1466", "JNPT", "29-Jul-26"],
+    ["GJ39T4048", "JNPT", "29-Jul-26"],
+    ["MH15GV3800", "BPCL MANMAD", "29-Jul-26"],
+    ["UP53GT0702", "KANPUR", "29-Jul-26"],
+    ["UP93ET4294", "KANPUR", "29-Jul-26"],
+    ["UP94AT7890", "KANPUR", "29-Jul-26"],
+    ["UP27DT0753", "KANPUR", "29-Jul-26"],
+    ["MP04HE5569", "BHOPAL", "31-Jul-26"]
+
+];
+
+
+/* ==========================================================
+   NORMALIZE SEARCH
+
+   Makes:
+   GJ45
+   gj45
+   Gj45
+   gJ45
+   GJ 45
+
+   all behave the same.
+   ========================================================== */
+
+function normalize(value) {
+
+    return value
+        .toString()
+        .toUpperCase()
+        .replace(/\s+/g, "")
+        .trim();
+
+}
+
+
+/* ==========================================================
+   SEARCH FUNCTION
+   ========================================================== */
+
+function searchVehicle() {
+
+    const input = document.getElementById("vehicleSearch");
+
+    const query = normalize(input.value);
+
+    const resultsBody = document.getElementById("resultsBody");
+
+    const statusCard = document.getElementById("statusCard");
+
+
+    /* Empty search */
+
+    if (query === "") {
+
+        statusCard.className = "status-card";
+        statusCard.innerHTML = "";
+
+        resultsBody.innerHTML = `
+            <tr>
+                <td colspan="5">
+                    <div class="empty">
+                        <div class="empty-icon">🚛</div>
+                        Enter a vehicle number to search
+                    </div>
+                </td>
+            </tr>
+        `;
+
+        return;
+    }
+
+
+    /* Search */
+
+    const results = vehicleData.filter(row => {
+
+        const vehicle = normalize(row[0]);
+
+        return vehicle.includes(query);
+
+    });
+
+
+    /* Vehicle found */
+
+    if (results.length > 0) {
+
+        statusCard.className = "status-card status-checked";
+
+        statusCard.innerHTML =
+            "⚠️ ALREADY CHECKED — DO NOT CHECK THIS VEHICLE";
+
+
+        resultsBody.innerHTML = results.map((row, index) => {
+
+            return `
+                <tr>
+
+                    <td>${index + 1}</td>
+
+                    <td class="vehicle">
+                        ${row[0]}
+                    </td>
+
+                    <td>
+                        ${row[1]}
+                    </td>
+
+                    <td>
+                        ${row[2]}
+                    </td>
+
+                    <td>
+                        <span class="badge badge-checked">
+                            ALREADY CHECKED
+                        </span>
+                    </td>
+
+                </tr>
+            `;
+
+        }).join("");
+
+    }
+
+
+    /* Vehicle NOT found */
+
+    else {
+
+        statusCard.className = "status-card status-new";
+
+        statusCard.innerHTML =
+            "✅ VEHICLE NOT FOUND — CHECK THIS VEHICLE";
+
+
+        resultsBody.innerHTML = `
+            <tr>
+
+                <td colspan="5">
+
+                    <div class="empty">
+
+                        <div class="empty-icon">✅</div>
+
+                        <strong>CHECK THIS VEHICLE</strong>
+
+                        <br><br>
+
+                        Vehicle number
+                        <strong>${query}</strong>
+                        was not found in the checked vehicle list.
+
+                    </div>
+
+                </td>
+
+            </tr>
+        `;
+
+    }
+
+}
+
+
+/* ==========================================================
+   CLEAR
+   ========================================================== */
+
+function clearSearch() {
+
+    document.getElementById("vehicleSearch").value = "";
+
+    document.getElementById("statusCard").className =
+        "status-card";
+
+    document.getElementById("statusCard").innerHTML = "";
+
+    document.getElementById("resultsBody").innerHTML = `
+        <tr>
+            <td colspan="5">
+                <div class="empty">
+                    <div class="empty-icon">🚛</div>
+                    Enter a vehicle number to search
+                </div>
+            </td>
+        </tr>
+    `;
+
+    document.getElementById("vehicleSearch").focus();
+
+}
+
+
+/* ==========================================================
+   LIVE SEARCH
+   ========================================================== */
+
+document
+    .getElementById("vehicleSearch")
+    .addEventListener("input", searchVehicle);
+
+
+/* ENTER KEY */
+
+document
+    .getElementById("vehicleSearch")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+
+            searchVehicle();
+
+        }
+
+    });
+
+</script>
+
+</body>
+</html>
